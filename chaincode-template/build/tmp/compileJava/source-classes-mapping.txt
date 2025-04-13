@@ -1,0 +1,4 @@
+org/hyperledger/fabric/samples/MyAsset.java
+ org.hyperledger.fabric.samples.MyAsset
+org/hyperledger/fabric/samples/MySmartContract.java
+ org.hyperledger.fabric.samples.MySmartContract
