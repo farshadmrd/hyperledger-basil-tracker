@@ -13,9 +13,10 @@ public final class Owner {
 
     @Property()
     private String user;
+// e.g., Greenhouse, Transporter, Supermarket
 
-    public Owner(@JsonProperty("orgId") final String orgId, 
-                 @JsonProperty("user") final String user) {
+    public Owner(@JsonProperty("orgId") final String orgId,
+            @JsonProperty("user") final String user) {
         this.orgId = orgId;
         this.user = user;
     }
@@ -28,12 +29,16 @@ public final class Owner {
         return user;
     }
 
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Owner)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Owner))
+            return false;
         Owner owner = (Owner) o;
-        return Objects.equals(orgId, owner.orgId) && Objects.equals(user, owner.user);
+        return Objects.equals(orgId, owner.orgId)
+                && Objects.equals(user, owner.user);
     }
 
     @Override
