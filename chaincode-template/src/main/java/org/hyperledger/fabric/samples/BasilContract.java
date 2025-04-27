@@ -139,6 +139,31 @@ public class BasilContract implements ContractInterface {
         stub.putStringState(qrCode, genson.serialize(updated));
     }
 
+    // Get all basil assets
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public String getAllBasil(final Context ctx) {
+        ChaincodeStub stub = ctx.getStub();
+        List<Basil> queryResults = new ArrayList<>();
+
+        // Get all keys that start with empty string (all keys)
+        try {
+            // Get all basil assets
+            stub.getStateByRange("", "").forEach(item -> {
+                String key = item.getKey();
+                String value = item.getStringValue();
+                
+                // Deserialize and add to results
+                Basil basil = genson.deserialize(value, Basil.class);
+                queryResults.add(basil);
+            });
+            
+            // Return the list of basil assets
+            return genson.serialize(queryResults);
+        } catch (Exception e) {
+            throw new ChaincodeException("Failed to get all basil assets: " + e.getMessage());
+        }
+    }
+
     private String getClientOrgId(Context ctx) {
         return ctx.getClientIdentity().getMSPID();
     }

@@ -90,6 +90,8 @@ public class FabricService {
                 .getNetwork(CHANNEL_NAME)
                 .getContract(CHAINCODE_NAME);
 
+        System.out.println("Creating basil with qrCode: " + id + ", origin: " + location);
+        // Map id to qrCode and location to origin as expected by the chaincode
         byte[] result = contract.submitTransaction("createBasil", id, location);
         return new String(result);
     }
@@ -116,8 +118,83 @@ public class FabricService {
                 .getNetwork(CHANNEL_NAME)
                 .getContract(CHAINCODE_NAME);
 
-        byte[] result = contract.evaluateTransaction("GetAllBasil");
+        System.out.println("Calling getAllBasil function on chaincode...");
+        byte[] result = contract.evaluateTransaction("getAllBasil");
         return prettyJson(result);
+    }
+    
+    public String testChaincodeConnectivity() throws Exception {
+        if (gateway == null) {
+            connect();
+        }
+        
+        Contract contract = gateway
+                .getNetwork(CHANNEL_NAME)
+                .getContract(CHAINCODE_NAME);
+        
+        StringBuilder results = new StringBuilder();
+        results.append("Chaincode connectivity test results:\\n");
+        results.append("- Channel: ").append(CHANNEL_NAME).append("\\n");
+        results.append("- Chaincode: ").append(CHAINCODE_NAME).append("\\n\\n");
+
+        // Test common function names from asset-transfer-basic chaincode
+        String[] functionNames = {
+            // Original asset-transfer-basic functions
+            "GetAllAssets", "getAllAssets", "ReadAsset", "readAsset",
+            // Potential basil-specific functions
+            "GetAllBasil", "getAllBasil", "ReadBasil", "readBasil", "queryAllBasil"
+        };
+        
+        for (String functionName : functionNames) {
+            try {
+                results.append("Testing function '").append(functionName).append("': ");
+                if (functionName.contains("All")) {
+                    // Try to query all assets/basil
+                    byte[] queryResult = contract.evaluateTransaction(functionName);
+                    results.append("SUCCESS ✓\\n");
+                    results.append("Result: ").append(prettyJson(queryResult)).append("\\n\\n");
+                } else if (functionName.contains("Read") || functionName.contains("read")) {
+                    // Create test asset first if needed, then try to read it
+                    try {
+                        String testId = "test-asset-" + System.currentTimeMillis();
+                        // Try different create function names
+                        try {
+                            contract.submitTransaction("CreateAsset", testId, "yellow", "10", "TestOwner", "100");
+                        } catch (Exception e1) {
+                            try {
+                                contract.submitTransaction("createAsset", testId, "yellow", "10", "TestOwner", "100");
+                            } catch (Exception e2) {
+                                try {
+                                    contract.submitTransaction("createBasil", testId, "TestLocation");
+                                } catch (Exception e3) {
+                                    // Ignore creation errors and try to read an existing asset
+                                }
+                            }
+                        }
+                        
+                        // Now try to read
+                        byte[] readResult = contract.evaluateTransaction(functionName, testId);
+                        results.append("SUCCESS ✓\\n");
+                        results.append("Result: ").append(prettyJson(readResult)).append("\\n\\n");
+                    } catch (Exception e) {
+                        // Try with a default ID
+                        try {
+                            byte[] readResult = contract.evaluateTransaction(functionName, "asset1");
+                            results.append("SUCCESS with default ID ✓\\n");
+                            results.append("Result: ").append(prettyJson(readResult)).append("\\n\\n");
+                        } catch (Exception e2) {
+                            results.append("FAILED ✗\\n");
+                            results.append("Error: ").append(e2.getMessage()).append("\\n\\n");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                results.append("FAILED ✗\\n");
+                results.append("Error: ").append(e.getMessage()).append("\\n\\n");
+            }
+        }
+        
+        return results.toString();
     }
     
     public void closeConnection() {
@@ -141,5 +218,73 @@ public class FabricService {
     private String prettyJson(final String json) {
         var parsedJson = JsonParser.parseString(json);
         return gson.toJson(parsedJson);
+    }
+
+    // Delete basil
+    public String deleteBasil(String id) throws Exception {
+        if (gateway == null) {
+            connect();
+        }
+        
+        Contract contract = gateway
+                .getNetwork(CHANNEL_NAME)
+                .getContract(CHAINCODE_NAME);
+
+        System.out.println("Deleting basil with QR code: " + id);
+        byte[] result = contract.submitTransaction("deleteBasil", id);
+        return "Basil deleted successfully";
+    }
+    
+    // Update basil state
+    public String updateBasilState(String id, String gps, Long timestamp, String temp, String humidity, String status) throws Exception {
+        if (gateway == null) {
+            connect();
+        }
+        
+        Contract contract = gateway
+                .getNetwork(CHANNEL_NAME)
+                .getContract(CHAINCODE_NAME);
+
+        System.out.println("Updating basil state for QR code: " + id);
+        byte[] result = contract.submitTransaction(
+            "updateBasilState", 
+            id, 
+            gps, 
+            String.valueOf(timestamp), 
+            temp, 
+            humidity,
+            status
+        );
+        return "Basil state updated successfully";
+    }
+    
+    // Get basil history
+    public String getBasilHistory(String id) throws Exception {
+        if (gateway == null) {
+            connect();
+        }
+        
+        Contract contract = gateway
+                .getNetwork(CHANNEL_NAME)
+                .getContract(CHAINCODE_NAME);
+
+        System.out.println("Getting history for basil with QR code: " + id);
+        byte[] result = contract.evaluateTransaction("getHistory", id);
+        return prettyJson(result);
+    }
+    
+    // Transfer ownership
+    public String transferOwnership(String id, String newOrgId, String newName) throws Exception {
+        if (gateway == null) {
+            connect();
+        }
+        
+        Contract contract = gateway
+                .getNetwork(CHANNEL_NAME)
+                .getContract(CHAINCODE_NAME);
+
+        System.out.println("Transferring ownership of basil with QR code: " + id + " to org: " + newOrgId + ", name: " + newName);
+        byte[] result = contract.submitTransaction("transferOwnership", id, newOrgId, newName);
+        return "Ownership transferred successfully";
     }
 }

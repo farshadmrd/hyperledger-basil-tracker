@@ -35,6 +35,10 @@ dependencies {
     
     developmentOnly 'org.springframework.boot:spring-boot-devtools:2.7.7'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.7'
+    
+    // Swagger OpenAPI UI dependencies
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
+    implementation 'org.springdoc:springdoc-openapi-webmvc-core:1.6.15'
 }
 
 // Use either toolchain or source/target compatibility, not both
