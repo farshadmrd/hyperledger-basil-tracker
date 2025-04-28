@@ -2,31 +2,44 @@ package org1.model;
 
 import java.util.List;
 
+/**
+ * Represents a basil plant in the supply chain.
+ */
 public class Basil {
     private String qrCode;
     private Long creationTimestamp;
-    private String origin;
+    private String location;     // Initial location (greenhouse)
     private String currentStatus;
-    private String currentGps;
+    private String currentGps;   // Current geographical location
+    private String temperature;  // Temperature measurement
+    private String humidity;     // Humidity measurement
     private Owner currentOwner;
     private List<BasilLeg> transportHistory;
     
     // Default constructor for JSON deserialization
     public Basil() {}
     
-    // Create request constructor (just needs ID and origin)
+    // Create request constructor with temperature and humidity
+    public Basil(String id, String location, String temperature, String humidity) {
+        this.qrCode = id;
+        this.location = location;
+        this.temperature = temperature;
+        this.humidity = humidity;
+    }
+    
+    // Create request constructor (just needs ID and location)
     public Basil(String id, String location) {
         this.qrCode = id;
-        this.origin = location;
+        this.location = location;
     }
     
     // Full constructor matching chaincode model
-    public Basil(String qrCode, Long creationTimestamp, String origin, 
+    public Basil(String qrCode, Long creationTimestamp, String location, 
                 String currentStatus, String currentGps, 
                 Owner currentOwner, List<BasilLeg> transportHistory) {
         this.qrCode = qrCode;
         this.creationTimestamp = creationTimestamp;
-        this.origin = origin;
+        this.location = location;
         this.currentStatus = currentStatus;
         this.currentGps = currentGps;
         this.currentOwner = currentOwner;
@@ -42,15 +55,24 @@ public class Basil {
         this.qrCode = id;
     }
     
-    public String getLocation() {
-        return origin;
+    // Getters and setters for temperature and humidity
+    public String getTemperature() {
+        return temperature;
     }
     
-    public void setLocation(String location) {
-        this.origin = location;
+    public void setTemperature(String temperature) {
+        this.temperature = temperature;
     }
     
-    // Getters and setters for new fields
+    public String getHumidity() {
+        return humidity;
+    }
+    
+    public void setHumidity(String humidity) {
+        this.humidity = humidity;
+    }
+    
+    // Getters and setters for fields
     public String getQrCode() {
         return qrCode;
     }
@@ -67,12 +89,12 @@ public class Basil {
         this.creationTimestamp = creationTimestamp;
     }
     
-    public String getOrigin() {
-        return origin;
+    public String getLocation() {
+        return location;
     }
     
-    public void setOrigin(String origin) {
-        this.origin = origin;
+    public void setLocation(String location) {
+        this.location = location;
     }
     
     public String getCurrentStatus() {

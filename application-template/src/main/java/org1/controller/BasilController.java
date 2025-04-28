@@ -24,7 +24,23 @@ public class BasilController {
     @PostMapping
     public ResponseEntity<String> createBasil(@RequestBody Basil basil) {
         try {
-            String result = fabricService.createBasil(basil.getId(), basil.getLocation());
+            String result;
+            // Using location field consistently (maps to origin in blockchain)
+            String location = basil.getLocation();
+            
+            // Check if temperature and humidity are provided
+            if (basil.getTemperature() != null && basil.getHumidity() != null) {
+                result = fabricService.createBasil(
+                    basil.getId(), 
+                    location,
+                    basil.getTemperature(),
+                    basil.getHumidity()
+                );
+            } else {
+                // Fall back to original method if temperature and humidity are not provided
+                result = fabricService.createBasil(basil.getId(), location);
+            }
+            
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error creating basil: " + e.getMessage());

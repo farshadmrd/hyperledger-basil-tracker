@@ -17,13 +17,13 @@ public final class Basil {
     private final Long creationTimestamp; 
 
     @Property()
-    private final String origin; // Greenhouse or starting point
+    private final String location; // Initial location (greenhouse)
 
     @Property()
     private final String currentStatus; // e.g., In Transit, Delivered
 
     @Property()
-    private final String currentGps;
+    private final String currentGps; // Current GPS location
 
     @Property()
     private final Owner currentOwner;
@@ -31,21 +31,28 @@ public final class Basil {
     @Property()
     private final List<BasilLeg> transportHistory;
 
+    // Standard constructor with all fields
     public Basil(
             @JsonProperty("qrCode") String qrCode,
             @JsonProperty("creationTimestamp") Long creationTimestamp,
-            @JsonProperty("origin") String origin,
+            @JsonProperty("location") String location,
             @JsonProperty("currentStatus") String currentStatus,
             @JsonProperty("currentGps") String currentGps,
             @JsonProperty("currentOwner") Owner currentOwner,
             @JsonProperty("transportHistory") List<BasilLeg> transportHistory) {
         this.qrCode = qrCode;
         this.creationTimestamp = creationTimestamp;
-        this.origin = origin;
+        this.location = location;
         this.currentStatus = currentStatus;
         this.currentGps = currentGps;
         this.currentOwner = currentOwner;
         this.transportHistory = transportHistory;
+    }
+    
+    // Simplified constructor for creation (initializes currentGps = location)
+    public Basil(String qrCode, Long creationTimestamp, String location, 
+                String currentStatus, Owner currentOwner, List<BasilLeg> transportHistory) {
+        this(qrCode, creationTimestamp, location, currentStatus, location, currentOwner, transportHistory);
     }
 
     public String getQrCode() {
@@ -56,8 +63,8 @@ public final class Basil {
         return creationTimestamp;
     }
 
-    public String getOrigin() {
-        return origin;
+    public String getLocation() {
+        return location;
     }
 
     public String getCurrentStatus() {
@@ -94,7 +101,7 @@ public final class Basil {
         return "Basil{" +
                 "qrCode='" + qrCode + '\'' +
                 ", creationTimestamp=" + creationTimestamp +
-                ", origin='" + origin + '\'' +
+                ", location='" + location + '\'' +
                 ", currentStatus='" + currentStatus + '\'' +
                 ", currentGps='" + currentGps + '\'' +
                 ", currentOwner=" + currentOwner +

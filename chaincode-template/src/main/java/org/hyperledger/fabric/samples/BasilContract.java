@@ -32,7 +32,7 @@ public class BasilContract implements ContractInterface {
 
     // Create a new basil plant
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public void createBasil(Context ctx, String qrCode, String origin) {
+    public void createBasil(Context ctx, String qrCode, String location, String temperature, String humidity) {
         rejectIfSupermarket(ctx);
         ChaincodeStub stub = ctx.getStub();
 
@@ -44,13 +44,25 @@ public class BasilContract implements ContractInterface {
         Owner owner = new Owner(orgId, "Greenhouse");
         Long creationTimestamp = stub.getTxTimestamp().getEpochSecond();
 
-        BasilLeg initialLeg = createBasilLeg(creationTimestamp, origin, "N/A", "N/A", owner);
+        // Use provided temperature and humidity instead of "N/A"
+        BasilLeg initialLeg = createBasilLeg(creationTimestamp, location, 
+                                            temperature != null ? temperature : "N/A", 
+                                            humidity != null ? humidity : "N/A", 
+                                            owner);
         List<BasilLeg> history = new ArrayList<>();
         history.add(initialLeg);
 
-        Basil basil = new Basil(qrCode, creationTimestamp, origin, "Created", origin, owner, history);
+        // Using simplified constructor - only need to specify location once
+        String initialStatus = "Created";
+        Basil basil = new Basil(qrCode, creationTimestamp, location, initialStatus, owner, history);
 
         stub.putStringState(qrCode, genson.serialize(basil));
+    }
+
+    // For backward compatibility, keep the original method
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public void createBasil(Context ctx, String qrCode, String location) {
+        createBasil(ctx, qrCode, location, "N/A", "N/A");
     }
 
     // Stop tracking a basil plant (delete it)
@@ -88,7 +100,7 @@ public class BasilContract implements ContractInterface {
         Basil updated = new Basil(
                 basil.getQrCode(),
                 basil.getCreationTimestamp(),
-                basil.getOrigin(),
+                basil.getLocation(), // Changed from origin to location
                 status,
                 gps,
                 owner,
@@ -130,7 +142,7 @@ public class BasilContract implements ContractInterface {
         Basil updated = new Basil(
                 basil.getQrCode(),
                 basil.getCreationTimestamp(),
-                basil.getOrigin(),
+                basil.getLocation(), // Changed from origin to location
                 basil.getCurrentStatus(),
                 basil.getCurrentGps(),
                 newOwner,

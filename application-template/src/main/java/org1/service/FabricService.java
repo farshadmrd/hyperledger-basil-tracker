@@ -85,7 +85,7 @@ public class FabricService {
         gateway = builderOrg1.connect();
     }
     
-    public String createBasil(String id, String location) throws Exception {
+    public String createBasil(String id, String location, String temperature, String humidity) throws Exception {
         if (gateway == null) {
             connect();
         }
@@ -94,10 +94,15 @@ public class FabricService {
                 .getNetwork(CHANNEL_NAME)
                 .getContract(CHAINCODE_NAME);
 
-        System.out.println("Creating basil with qrCode: " + id + ", origin: " + location);
+        System.out.println("Creating basil with qrCode: " + id + ", origin: " + location + 
+                          ", temperature: " + temperature + ", humidity: " + humidity);
         // Map id to qrCode and location to origin as expected by the chaincode
-        byte[] result = contract.submitTransaction("createBasil", id, location);
+        byte[] result = contract.submitTransaction("createBasil", id, location, temperature, humidity);
         return new String(result);
+    }
+    
+    public String createBasil(String id, String location) throws Exception {
+        return createBasil(id, location, "N/A", "N/A");
     }
     
     public String getBasil(String id) throws Exception {
