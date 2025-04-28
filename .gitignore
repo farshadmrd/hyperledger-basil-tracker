@@ -24,6 +24,7 @@ replay_pid*
 **/application-*.yml
 !**/application.properties
 !**/application.yml
+!**/application-org2.properties  # Exception for org2 properties file
 
 # IDE - IntelliJ IDEA
 .idea/
