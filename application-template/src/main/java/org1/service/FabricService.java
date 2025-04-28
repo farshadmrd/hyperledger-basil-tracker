@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hyperledger.fabric.client.Contract;
 import org.hyperledger.fabric.client.Gateway;
@@ -13,6 +15,8 @@ import org.hyperledger.fabric.client.identity.Identities;
 import org.hyperledger.fabric.client.identity.Signers;
 import org.hyperledger.fabric.client.identity.X509Identity;
 import org.springframework.stereotype.Service;
+
+import org1.model.Organization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -286,5 +290,24 @@ public class FabricService {
         System.out.println("Transferring ownership of basil with QR code: " + id + " to org: " + newOrgId + ", name: " + newName);
         byte[] result = contract.submitTransaction("transferOwnership", id, newOrgId, newName);
         return "Ownership transferred successfully";
+    }
+    
+    // Get all organizations
+    public List<Organization> getAllOrganizations() {
+        List<Organization> organizations = new ArrayList<>();
+        
+        // Real organizations from the Fabric network (Pittaluga & Fratelli and Supermarket)
+        organizations.add(new Organization("Org1MSP", "Pittaluga & Fratelli", "producer", "Fresh basil producer organization"));
+        organizations.add(new Organization("Org2MSP", "Supermarket", "retailer", "Organization that sells basil to consumers"));
+        
+        return organizations;
+    }
+    
+    // Get organization by ID
+    public Organization getOrganizationById(String id) {
+        return getAllOrganizations().stream()
+                .filter(org -> org.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 }

@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.hyperledger.fabric.client.Contract;
@@ -21,6 +23,7 @@ import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
 import io.grpc.TlsChannelCredentials;
+import org2.model.Organization;
 
 @Service
 public class FabricServiceOrg2 {
@@ -120,6 +123,25 @@ public class FabricServiceOrg2 {
         System.out.println("Getting history for basil with QR code: " + id + " as Org2");
         byte[] result = contract.evaluateTransaction("getHistory", id);
         return prettyJson(result);
+    }
+    
+    // Get all organizations
+    public List<Organization> getAllOrganizations() {
+        List<Organization> organizations = new ArrayList<>();
+        
+        // Real organizations from the Fabric network (Pittaluga & Fratelli and Supermarket)
+        organizations.add(new Organization("Org1MSP", "Pittaluga & Fratelli", "producer", "Fresh basil producer organization"));
+        organizations.add(new Organization("Org2MSP", "Supermarket", "retailer", "Organization that sells basil to consumers"));
+        
+        return organizations;
+    }
+    
+    // Get organization by ID
+    public Organization getOrganizationById(String id) {
+        return getAllOrganizations().stream()
+                .filter(org -> org.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
     
     public void closeConnection() {
