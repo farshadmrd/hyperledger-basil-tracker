@@ -32,7 +32,7 @@ public class BasilContract implements ContractInterface {
 
     // Create a new basil plant
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public void createBasil(Context ctx, String qrCode, String location, String temperature, String humidity) {
+    public void createBasil(Context ctx, String qrCode, String station, String gps, String temperature, String humidity) {
         rejectIfSupermarket(ctx);
         ChaincodeStub stub = ctx.getStub();
 
@@ -45,24 +45,33 @@ public class BasilContract implements ContractInterface {
         Long creationTimestamp = stub.getTxTimestamp().getEpochSecond();
 
         // Use provided temperature and humidity instead of "N/A"
-        BasilLeg initialLeg = createBasilLeg(creationTimestamp, location, 
+        BasilLeg initialLeg = createBasilLeg(creationTimestamp, 
+                                            gps != null && !gps.isEmpty() ? gps : station, 
                                             temperature != null ? temperature : "N/A", 
                                             humidity != null ? humidity : "N/A", 
                                             owner);
         List<BasilLeg> history = new ArrayList<>();
         history.add(initialLeg);
 
-        // Using simplified constructor - only need to specify location once
+        // Now use the provided GPS value if available, otherwise fallback to station
         String initialStatus = "Created";
-        Basil basil = new Basil(qrCode, creationTimestamp, location, initialStatus, owner, history);
+        // Use separate gps parameter if provided, otherwise use station
+        String initialGps = gps != null && !gps.isEmpty() ? gps : station;
+        
+        Basil basil = new Basil(qrCode, creationTimestamp, station, initialStatus, initialGps, owner, history);
 
         stub.putStringState(qrCode, genson.serialize(basil));
     }
 
-    // For backward compatibility, keep the original method
+    // For backward compatibility, keep the original methods
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public void createBasil(Context ctx, String qrCode, String location) {
-        createBasil(ctx, qrCode, location, "N/A", "N/A");
+    public void createBasil(Context ctx, String qrCode, String station, String temperature, String humidity) {
+        createBasil(ctx, qrCode, station, null, temperature, humidity);
+    }
+
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public void createBasil(Context ctx, String qrCode, String station) {
+        createBasil(ctx, qrCode, station, null, "N/A", "N/A");
     }
 
     // Stop tracking a basil plant (delete it)
@@ -100,7 +109,7 @@ public class BasilContract implements ContractInterface {
         Basil updated = new Basil(
                 basil.getQrCode(),
                 basil.getCreationTimestamp(),
-                basil.getLocation(), // Changed from origin to location
+                basil.getStation(), // Changed from location/origin to station
                 status,
                 gps,
                 owner,
@@ -142,7 +151,7 @@ public class BasilContract implements ContractInterface {
         Basil updated = new Basil(
                 basil.getQrCode(),
                 basil.getCreationTimestamp(),
-                basil.getLocation(), // Changed from origin to location
+                basil.getStation(), // Changed from location/origin to station
                 basil.getCurrentStatus(),
                 basil.getCurrentGps(),
                 newOwner,

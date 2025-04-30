@@ -17,13 +17,13 @@ public final class Basil {
     private final Long creationTimestamp; 
 
     @Property()
-    private final String location; // Initial location (greenhouse)
+    private final String station; // Changed from location/origin to station
 
     @Property()
-    private final String currentStatus; // e.g., In Transit, Delivered
+    private final String currentStatus;
 
     @Property()
-    private final String currentGps; // Current GPS location
+    private final String currentGps;
 
     @Property()
     private final Owner currentOwner;
@@ -31,28 +31,27 @@ public final class Basil {
     @Property()
     private final List<BasilLeg> transportHistory;
 
-    // Standard constructor with all fields
     public Basil(
             @JsonProperty("qrCode") String qrCode,
             @JsonProperty("creationTimestamp") Long creationTimestamp,
-            @JsonProperty("location") String location,
+            @JsonProperty("station") String station,
             @JsonProperty("currentStatus") String currentStatus,
             @JsonProperty("currentGps") String currentGps,
             @JsonProperty("currentOwner") Owner currentOwner,
             @JsonProperty("transportHistory") List<BasilLeg> transportHistory) {
         this.qrCode = qrCode;
         this.creationTimestamp = creationTimestamp;
-        this.location = location;
+        this.station = station;
         this.currentStatus = currentStatus;
         this.currentGps = currentGps;
         this.currentOwner = currentOwner;
         this.transportHistory = transportHistory;
     }
     
-    // Simplified constructor for creation (initializes currentGps = location)
-    public Basil(String qrCode, Long creationTimestamp, String location, 
+    // Simplified constructor for creation (initializes currentGps = station)
+    public Basil(String qrCode, Long creationTimestamp, String station, 
                 String currentStatus, Owner currentOwner, List<BasilLeg> transportHistory) {
-        this(qrCode, creationTimestamp, location, currentStatus, location, currentOwner, transportHistory);
+        this(qrCode, creationTimestamp, station, currentStatus, station, currentOwner, transportHistory);
     }
 
     public String getQrCode() {
@@ -63,8 +62,8 @@ public final class Basil {
         return creationTimestamp;
     }
 
-    public String getLocation() {
-        return location;
+    public String getStation() {
+        return station;
     }
 
     public String getCurrentStatus() {
@@ -101,7 +100,7 @@ public final class Basil {
         return "Basil{" +
                 "qrCode='" + qrCode + '\'' +
                 ", creationTimestamp=" + creationTimestamp +
-                ", location='" + location + '\'' +
+                ", station='" + station + '\'' +
                 ", currentStatus='" + currentStatus + '\'' +
                 ", currentGps='" + currentGps + '\'' +
                 ", currentOwner=" + currentOwner +

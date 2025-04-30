@@ -25,20 +25,31 @@ public class BasilController {
     public ResponseEntity<String> createBasil(@RequestBody Basil basil) {
         try {
             String result;
-            // Using location field consistently (maps to origin in blockchain)
-            String location = basil.getLocation();
             
-            // Check if temperature and humidity are provided
-            if (basil.getTemperature() != null && basil.getHumidity() != null) {
+            // For backward compatibility, getLocation() maps to getStation()
+            String station = basil.getStation() != null ? basil.getStation() : basil.getLocation();
+            
+            // Check if GPS, temperature and humidity are provided
+            if (basil.getCurrentGps() != null && basil.getTemperature() != null && basil.getHumidity() != null) {
+                // Full create with GPS, temperature, humidity
                 result = fabricService.createBasil(
                     basil.getId(), 
-                    location,
+                    station,
+                    basil.getCurrentGps(),
+                    basil.getTemperature(),
+                    basil.getHumidity()
+                );
+            } else if (basil.getTemperature() != null && basil.getHumidity() != null) {
+                // Create with temperature and humidity but no GPS
+                result = fabricService.createBasil(
+                    basil.getId(), 
+                    station,
                     basil.getTemperature(),
                     basil.getHumidity()
                 );
             } else {
-                // Fall back to original method if temperature and humidity are not provided
-                result = fabricService.createBasil(basil.getId(), location);
+                // Basic create with just ID and station
+                result = fabricService.createBasil(basil.getId(), station);
             }
             
             return ResponseEntity.ok(result);
